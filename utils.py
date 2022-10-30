@@ -76,7 +76,7 @@ def hybrid_update(new_urls, old_urls):
                 category_dict["sub"].add(sub_category)
             category_dict["primary"].add(category)
 
-            if len(category_dict["sub"]) > len_sub or len(category_dict["primary"]) > len_primary:
+            if (len(category_dict["sub"]) > len_sub and len_sub != 0) or len(category_dict["primary"]) > len_primary:
                 num_with_multiple_categories += 1
         else:
             if sub_category is not None:
@@ -94,5 +94,9 @@ def save_to_json(data, path):
             compatible_dict = {"primary": list(category_dict["primary"]), "sub": list(category_dict["sub"])}
             json_compatible_dict[url] = compatible_dict
         json.dump(json_compatible_dict, f)
+
+def convert_url_to_slug(url):
+    URL_START = "https://www.presidency.ucsb.edu/documents/"
+    return url.replace(URL_START, "").replace("/", "_").replace(":", "_").replace(".", "_")
 
     

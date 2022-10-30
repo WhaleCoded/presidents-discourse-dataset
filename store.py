@@ -4,10 +4,10 @@ import json
 import os
 from tqdm import tqdm
 import time
+from utils import convert_url_to_slug
+
 
 MIN_TIME_BETWEEN_REQUESTS = 0.3
-
-URL_START = "https://www.presidency.ucsb.edu/documents/"
 
 if __name__ == "__main__":
 
@@ -20,15 +20,12 @@ if __name__ == "__main__":
 
     p_bar = tqdm(document_urls.items())
     num_already_downloaded = 0
-    for url_to_hub, (category, sub_category) in p_bar:
+    DESTINATION_PATH = os.path.join(os.path.curdir, "data", "html")
+    os.makedirs(DESTINATION_PATH, exist_ok=True) 
+    for url_to_hub, _ in p_bar:
         start_time = time.time()
-        if sub_category is not None:
-            download_destination_path = os.path.join(os.path.curdir, "data", "html", category, sub_category)
-        else:
-            download_destination_path = os.path.join(os.path.curdir, "data", "html", category)
 
-        os.makedirs(download_destination_path, exist_ok=True)
-        download_destination = os.path.join(download_destination_path, url_to_hub.replace(URL_START, "").replace("/", "_").replace(":", "_").replace(".", "_") + ".html")
+        download_destination = os.path.join(DESTINATION_PATH, convert_url_to_slug(url_to_hub) + ".html")
 
         if not os.path.exists(download_destination):
             document_html = requests.get(url_to_hub).text
