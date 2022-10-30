@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup as bs
 import requests
+import json
 
 def get_category_and_sub_category_hubs(parent_url) -> dict:
     parent_html = requests.get(parent_url).text
@@ -61,5 +62,37 @@ def get_next_document_section(domain, soup):
 
     else:
         return None
+
+def hybrid_update(new_urls, old_urls):
+    num_duplicates = 0
+    num_with_multiple_categories = 0
+    for url, (category, sub_category) in new_urls.items():
+        if url in old_urls:
+            num_duplicates += 1
+            category_dict = old_urls[url]
+            len_sub = len(category_dict["sub"])
+            len_primary = len(category_dict["primary"])
+            if sub_category is not None:
+                category_dict["sub"].add(sub_category)
+            category_dict["primary"].add(category)
+
+            if len(category_dict["sub"]) > len_sub or len(category_dict["primary"]) > len_primary:
+                num_with_multiple_categories += 1
+        else:
+            if sub_category is not None:
+                old_urls[url] = {"primary": set([category]), "sub": set([sub_category])}
+            else:
+                old_urls[url] = {"primary": set([category]), "sub": set()}
+
+    return old_urls, num_duplicates, num_with_multiple_categories
+
+def save_to_json(data, path):
+    # save the document urls to a json file
+    with open(path, "w+") as f:
+        json_compatible_dict = {}
+        for url, category_dict in data.items():
+            compatible_dict = {"primary": list(category_dict["primary"]), "sub": list(category_dict["sub"])}
+            json_compatible_dict[url] = compatible_dict
+        json.dump(json_compatible_dict, f)
 
     
