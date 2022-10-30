@@ -93,6 +93,9 @@ def save_to_json(data, path):
         for url, category_dict in data.items():
             compatible_dict = {"primary": list(category_dict["primary"]), "sub": list(category_dict["sub"])}
             json_compatible_dict[url] = compatible_dict
+
+        if len(json_compatible_dict) != len(data):
+            raise ValueError(f"The json_compatible_dict is not the same length as the data dict. {len(json_compatible_dict)} != {len(data)}")
         json.dump(json_compatible_dict, f)
 
 def convert_url_to_slug(url):

@@ -1,3 +1,5 @@
 /target
 /data
 data.zip
+document_urls.json
+document_slugs_to_urls.json
