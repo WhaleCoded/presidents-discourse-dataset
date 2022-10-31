@@ -1,5 +1,6 @@
-/target
+parallel_download/target
 /data
 data.zip
 document_urls.json
 document_slugs_to_urls.json
+/__pycache__

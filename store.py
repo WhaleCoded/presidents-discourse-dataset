@@ -11,7 +11,7 @@ MIN_TIME_BETWEEN_REQUESTS = 0.3
 
 if __name__ == "__main__":
 
-    document_urls_path = os.path.join(os.path.curdir, "data", "document_urls.json")
+    document_urls_path = os.path.join(os.path.curdir, "document_urls.json")
 
     with open(document_urls_path, "r") as f:
         document_urls = json.load(f)
