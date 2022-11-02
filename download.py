@@ -13,7 +13,7 @@ from utils import (
 )
 
 if __name__ == "__main__":
-    SAVE_PATH = os.path.join(os.path.curdir, "document_urls.json")
+    SAVE_PATH = os.path.join(os.path.curdir, "data", "document_urls.json")
     domain = "https://www.presidency.ucsb.edu"
     parent_url = domain + "/documents"
 
