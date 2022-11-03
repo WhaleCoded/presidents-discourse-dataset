@@ -124,6 +124,20 @@ PRONOUNS  = [
 
 PRONOUNS = set([pronoun.lower() for pronoun in PRONOUNS])
 
+# Load the LIWC pronoun dictionary
+import csv
+with open("liwc_dictionary.csv", "r") as f:
+    reader = csv.reader(f, delimiter="\n")
+
+    # Get the pronoun words
+    liwc_pronouns = []
+    for row in reader:
+        if len(row) > 0:
+            pronoun = row[0].lower().replace("*", "")
+            liwc_pronouns.append(pronoun)
+
+LIWC_PRONOUNS = set(liwc_pronouns)
+
 PRESIDENTS = [
     "George Washington",
     "John Adams",
