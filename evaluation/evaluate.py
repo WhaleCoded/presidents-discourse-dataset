@@ -55,7 +55,8 @@ def clean_and_load_dataset():
     return dataset
 
 def get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary, results_path):
-    pure_counts_path = os.path.join(results_path, f"{dictionary_name}_pure_counts.json")
+    pure_counts_path = os.path.join(results_path, "all_dictionaries", "counts", f"{dictionary_name}_pure_counts.json")
+    os.makedirs(os.path.dirname(pure_counts_path), exist_ok=True)
 
     if not os.path.exists(pure_counts_path):    
         # Count the number of times each pronoun is used by each president
@@ -90,6 +91,7 @@ def get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary,
 
 def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
     results_path = os.path.join(results_path, "all_dictionaries", dictionary_name)
+    os.makedirs(results_path, exist_ok=True)
 
     final_header = set()
     for counter in pronoun_counts.values():
