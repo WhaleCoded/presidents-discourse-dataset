@@ -25,7 +25,7 @@ def reduce_to_liwc_dictionary(tokens, liwc_dictionary):
             # Check for tokens with variable endings
             for pronoun in liwc_dictionary:
                 if pronoun.endswith("*") and token.lower().startswith(pronoun[:-1]):
-                    liwc_pronouns.append(token.lower())
+                    liwc_pronouns.append(pronoun)
                     break
 
     return liwc_pronouns
@@ -113,7 +113,7 @@ def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
     presidents_path = os.path.join(results_path, "presidents.csv")
     with open(presidents_path, "w+") as f:
         writer = csv.writer(f)
-        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total Proportion"])
+        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total"])
 
         cleaned_president_counts = {}
         sorted_names = sorted(list(pronoun_counts.keys()))
@@ -134,7 +134,7 @@ def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
     presidents_prop_path = os.path.join(results_path, "presidents_prop.csv")
     with open(presidents_prop_path, "w+") as f:
         writer = csv.writer(f)
-        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total Pronouns"])
+        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total Proportion"])
 
         # Get the total number of words spoken by each president
         total_words = {}
