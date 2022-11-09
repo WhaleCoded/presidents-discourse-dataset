@@ -134,12 +134,12 @@ def save_parsed_file(output, file_path):
         json.dump(output, f)
 
 if __name__ == "__main__":
-    SAVE_PATH = os.path.join(os.curdir, "data", "parsed_documents")
+    SAVE_PATH = os.path.join(os.curdir, os.pardir, "data", "parsed_documents")
     os.makedirs(SAVE_PATH, exist_ok=True)
-    CATEGORIES_PATH = os.path.join(os.curdir, "document_urls.json")
+    CATEGORIES_PATH = os.path.join(os.curdir, os.pardir, "data", "document_urls.json")
     with open(CATEGORIES_PATH, "r") as f:
         categories_by_url = json.load(f)
-    SLUGS_PATH = os.path.join(os.curdir, "document_slugs_to_urls.json")
+    SLUGS_PATH = os.path.join(os.curdir, os.pardir, "data", "document_slugs_to_urls.json")
     with open(SLUGS_PATH, "r") as f:
         slugs_to_urls = json.load(f)
     data_path = os.path.join(os.curdir, "data", "html")

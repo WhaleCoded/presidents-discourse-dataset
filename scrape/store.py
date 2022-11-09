@@ -11,7 +11,7 @@ MIN_TIME_BETWEEN_REQUESTS = 0.3
 
 if __name__ == "__main__":
 
-    document_urls_path = os.path.join(os.path.curdir, "data", "document_urls.json")
+    document_urls_path = os.path.join(os.path.curdir, os.pardir, "data", "document_urls.json")
 
     with open(document_urls_path, "r") as f:
         document_urls = json.load(f)
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     p_bar = tqdm(document_urls.items())
     num_already_downloaded = 0
-    DESTINATION_PATH = os.path.join(os.path.curdir, "data", "html")
+    DESTINATION_PATH = os.path.join(os.path.curdir, os.pardir, "data", "html")
     os.makedirs(DESTINATION_PATH, exist_ok=True) 
     for url_to_hub, _ in p_bar:
         start_time = time.time()

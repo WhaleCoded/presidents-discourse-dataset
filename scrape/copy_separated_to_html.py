@@ -2,7 +2,7 @@ import os
 import shutil
 from tqdm import tqdm
 
-DESTINATION_PATH = data_path = os.path.join(os.curdir, "data", "html")
+DESTINATION_PATH = data_path = os.path.join(os.curdir, os.pardir, "data", "html")
 os.makedirs(DESTINATION_PATH, exist_ok=True)
 
 def move_separated_to_html(separated_paths):
@@ -12,7 +12,7 @@ def move_separated_to_html(separated_paths):
         
         shutil.copy(separated_path, html_file_path)
 
-data_path = os.path.join(os.curdir, "data", "separated")
+data_path = os.path.join(os.curdir, os.pardir, "data", "separated")
 main_category_paths = [(category_name, os.path.join(data_path, category_name))  for category_name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, category_name))]
 
 for main_cat_name, main_cat_path in tqdm(main_category_paths):

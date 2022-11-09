@@ -2,8 +2,8 @@ from utils import convert_url_to_slug
 import os
 import json
 
-URL_PATHS = os.path.join(os.curdir, "data", "document_urls.json")
-DATA_PATH = os.path.join(os.curdir, "data", "html")
+URL_PATHS = os.path.join(os.curdir, os.pardir, "data", "document_urls.json")
+DATA_PATH = os.path.join(os.curdir, os.pardir, "data", "html")
 
 slugs_to_urls = {}
 with open(URL_PATHS, "r") as f:
@@ -15,7 +15,7 @@ with open(URL_PATHS, "r") as f:
         slugs_to_urls[slug] = url
 
 print(f"Mapped {len(slugs_to_urls)} slugs to urls")
-SAVE_PATH = os.path.join(os.curdir, "data", "document_slugs_to_urls.json")
+SAVE_PATH = os.path.join(os.curdir, os.pardir, "data", "document_slugs_to_urls.json")
 with open(SAVE_PATH, "w+") as f:
     json.dump(slugs_to_urls, f)
 
