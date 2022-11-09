@@ -1,4 +1,4 @@
-from lists import PRONOUNS, PRESIDENTS, LIWC_PRONOUNS
+from lists import PRESIDENTS, LIWC_DICTIONARIES, PRONOUNS
 from dataset import PresidentsDataset
 from collections import Counter
 from tqdm import tqdm
@@ -15,15 +15,15 @@ def reduce_to_nltk_pronouns(tokens):
 
     return pronoun_tokens
 
-def reduce_to_liwc_pronouns(tokens):
+def reduce_to_liwc_dictionary(tokens, liwc_dictionary):
     liwc_pronouns = []
 
     for token in tokens:
-        if token.lower() in LIWC_PRONOUNS:
+        if token.lower() in liwc_dictionary:
             liwc_pronouns.append(token.lower())
         else:
             # Check for tokens with variable endings
-            for pronoun in LIWC_PRONOUNS:
+            for pronoun in liwc_dictionary:
                 if pronoun.endswith("*") and token.lower().startswith(pronoun[:-1]):
                     liwc_pronouns.append(token.lower())
                     break
@@ -39,39 +39,34 @@ def reduce_to_custom_list(tokens):
 
     return custom_pronouns
 
-if __name__ == "__main__":
-    results_path = os.path.join(os.path.curdir, os.path.pardir, "results")
-    os.makedirs(results_path, exist_ok=True)
-    pure_counts_path = os.path.join(results_path, "pure_counts.json")
+def clean_and_load_dataset():
+    dataset = PresidentsDataset()
 
-    if not os.path.exists(pure_counts_path):
-        dataset = PresidentsDataset()
+    # Grab just the presidential documents
+    dataset.where(lambda data: "Presidential" in data["categories"]["primary"])
+    def thin_data(data):
+        return {
+            "slug": data["slug"],
+            "speaker": data["speaker"].lower(),
+            "body": data["body"]
+        }
+    dataset.map(thin_data)
 
-        # Grab just the presidential documents
-        dataset.where(lambda data: "Presidential" in data["categories"]["primary"])
-        def thin_data(data):
-            return {
-                "slug": data["slug"],
-                "speaker": data["speaker"].lower(),
-                "body": data["body"]
-            }
-        dataset.map(thin_data)
+    return dataset
 
+def get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary, results_path):
+    pure_counts_path = os.path.join(results_path, f"{dictionary_name}_pure_counts.json")
+
+    if not os.path.exists(pure_counts_path):    
         # Count the number of times each pronoun is used by each president
         pronoun_counts = {}
-        for data in tqdm(dataset, desc="Counting pronouns"):
+        for data in tqdm(cleaned_dataset, desc="Counting pronouns"):
             speaker = data["speaker"]
             if speaker in PRESIDENTS:
                 tokens = nltk.word_tokenize(data["body"])
-                
-                # Reduce to NLTK labeled pronouns
-                pronoun_tokens = reduce_to_nltk_pronouns(tokens)
 
                 # Reduce to LIWC pronouns
-                # pronoun_tokens = reduce_to_liwc_pronouns(tokens)
-
-                # Reduce to custom list of pronouns
-                pronoun_tokens = reduce_to_custom_list(pronoun_tokens)
+                pronoun_tokens = reduce_to_liwc_dictionary(tokens, liwc_dictionary)
 
                 # Keep running total of pronoun counts
                 if speaker not in pronoun_counts:
@@ -91,13 +86,15 @@ if __name__ == "__main__":
             for speaker, elements in pronoun_counts.items():
                 pronoun_counts[speaker] = Counter(elements)
 
-    
-    # Get header for president pronoun counts
+    return pronoun_counts
+
+def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
+    results_path = os.path.join(results_path, "all_dictionaries", dictionary_name)
+
     final_header = set()
     for counter in pronoun_counts.values():
         header = set(counter.keys())
         final_header = final_header.union(header)
-
     final_header = sorted(list(final_header))
 
     # Find the most common pronoun for each president
@@ -172,3 +169,16 @@ if __name__ == "__main__":
         writer.writerow(["Pronoun", "Count", "Proportion"])
         for pronoun in final_header:
             writer.writerow([pronoun, total_counts[pronoun], total_counts[pronoun] / total_pronoun])
+
+if __name__ == "__main__":
+    results_path = os.path.join(os.path.curdir, os.path.pardir, "results")
+    if not os.path.exists(results_path):
+        os.makedirs(results_path)
+
+    # Load the presidents dataset
+    cleaned_dataset = clean_and_load_dataset()
+
+    for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
+        print(f"Processing {dictionary_name}-{i+1}/{len(LIWC_DICTIONARIES)}")
+        pronoun_counts = get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary, results_path)
+        save_dictionary_results(dictionary_name, pronoun_counts, results_path)

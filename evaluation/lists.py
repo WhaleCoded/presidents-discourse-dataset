@@ -133,10 +133,28 @@ with open("liwc_dictionary.csv", "r") as f:
     liwc_pronouns = []
     for row in reader:
         if len(row) > 0:
-            pronoun = row[0].lower().replace("*", "")
+            pronoun = row[0].lower()
             liwc_pronouns.append(pronoun)
 
 LIWC_PRONOUNS = set(liwc_pronouns)
+
+# Load all the LIWC dictionaries
+with open("cleaned_liwc_dictionaries.csv", "r") as f:
+    reader = csv.reader(f)
+
+    # Get the pronoun words
+    liwc_dictionaries = {}
+    for row in reader:
+        dataset_name = row[0]
+
+        entries = []
+        for entry in row[1:]:
+            if entry != "":
+                entries.append(entry.lower())
+        
+        liwc_dictionaries[dataset_name] = set(entries)
+
+LIWC_DICTIONARIES = liwc_dictionaries
 
 PRESIDENTS = [
     "George Washington",
@@ -210,9 +228,6 @@ for data in dataset:
 president_speakers.remove("jill biden")
 president_speakers.remove("michelle obama")
 president_speakers.remove("melania trump")
-
-# print(not_presidents)
-# print(president_speakers)
-# print(len(president_speakers))
+president_speakers.remove("laura bush")
 
 PRESIDENTS = president_speakers
