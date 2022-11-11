@@ -1,11 +1,15 @@
-from lists import PRESIDENTS, LIWC_DICTIONARIES, PRONOUNS
-from dataset import PresidentsDataset
-from collections import Counter
-from tqdm import tqdm
-import csv
-import nltk
 import os
 import json
+import csv
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+import re
+
+from tqdm import tqdm
+import nltk
+
+from lists import PRESIDENTS, LIWC_DICTIONARIES, PRONOUNS
+from dataset import PresidentsDataset
 
 def reduce_to_nltk_pronouns(tokens):
     pos_tags = nltk.pos_tag(tokens)
@@ -14,22 +18,6 @@ def reduce_to_nltk_pronouns(tokens):
     pronoun_tokens = [word.lower() for word, pos in pos_tags if "PRP" in pos or pos == "WP"]
 
     return pronoun_tokens
-
-def reduce_to_liwc_dictionary(tokens, liwc_dictionary):
-    liwc_pronouns = []
-
-    for token in tokens:
-        lower_token = token.lower()
-        if lower_token in liwc_dictionary:
-            liwc_pronouns.append(lower_token)
-        else:
-            # Check for tokens with variable endings
-            for pronoun in liwc_dictionary:
-                if pronoun.endswith("*") and lower_token.startswith(pronoun[:-1]):
-                    liwc_pronouns.append(pronoun)
-                    break
-
-    return liwc_pronouns
 
 def reduce_to_custom_list(tokens):
     custom_pronouns = []
@@ -40,6 +28,28 @@ def reduce_to_custom_list(tokens):
             custom_pronouns.append(lower_token)
 
     return custom_pronouns
+
+def reduce_to_liwc_dictionary(tokens, liwc_dictionary, available_re):
+    liwc_pronouns = []
+
+    for token in tokens:
+        lower_token = token.lower()
+        if lower_token in liwc_dictionary:
+            liwc_pronouns.append(lower_token)
+        else:
+            # Check for tokens with variable endings
+            match = available_re.match(lower_token)
+            if match:
+                liwc_pronouns.append(match[0])
+    
+    # We return the regular expression object because it keeps track of patterns that have already been matched
+    return liwc_pronouns, available_re
+
+def create_re_from_dictionary(liwc_dictionary):
+    tokens_that_need_re = [token for token in liwc_dictionary if "*" in token]
+    re_string = "|".join([token.replace("*", ".*?") for token in tokens_that_need_re])
+
+    return re.compile(re_string)
 
 def clean_and_load_dataset():
     dataset = PresidentsDataset()
@@ -56,20 +66,21 @@ def clean_and_load_dataset():
 
     return dataset
 
-def get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary, results_path):
+def get_counts_for_dictionary(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path):
     pure_counts_path = os.path.join(results_path, "all_dictionaries", "counts", f"{dictionary_name}_pure_counts.json")
     os.makedirs(os.path.dirname(pure_counts_path), exist_ok=True)
 
     if not os.path.exists(pure_counts_path):    
         # Count the number of times each pronoun is used by each president
         pronoun_counts = {}
-        for data in tqdm(cleaned_dataset, desc="Counting pronouns"):
+        dictionary_re = create_re_from_dictionary(liwc_dictionary)
+        for data in tqdm(cleaned_dataset, desc=f"Counting {dictionary_name}-{dict_index + 1}/{len(LIWC_DICTIONARIES)}"):
             speaker = data["speaker"]
             if speaker in PRESIDENTS:
                 tokens = nltk.word_tokenize(data["body"])
 
                 # Reduce to LIWC pronouns
-                pronoun_tokens = reduce_to_liwc_dictionary(tokens, liwc_dictionary)
+                pronoun_tokens, dictionary_re = reduce_to_liwc_dictionary(tokens, liwc_dictionary, dictionary_re)
 
                 # Keep running total of pronoun counts
                 if speaker not in pronoun_counts:
@@ -175,14 +186,20 @@ def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
             writer.writerow([pronoun, total_counts[pronoun], total_counts[pronoun] / total_pronoun])
 
 if __name__ == "__main__":
-    results_path = os.path.join(os.path.curdir, os.path.pardir, "results")
+    results_path = os.path.join(os.path.curdir, os.path.pardir, "results", "multi_re")
     if not os.path.exists(results_path):
         os.makedirs(results_path)
 
     # Load the presidents dataset
     cleaned_dataset = clean_and_load_dataset()
 
-    for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
-        print(f"Processing {dictionary_name}-{i+1}/{len(LIWC_DICTIONARIES)}")
-        pronoun_counts = get_counts_for_dictionary(cleaned_dataset, dictionary_name, liwc_dictionary, results_path)
+    # Create Thread Pool
+    pool = ThreadPoolExecutor(max_workers=12)
+
+    def task(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path):
+        # print(f"Processing {dictionary_name}-{dict_index+1}/{len(LIWC_DICTIONARIES)}")
+        pronoun_counts = get_counts_for_dictionary(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path)
         save_dictionary_results(dictionary_name, pronoun_counts, results_path)
+
+    for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
+        pool.submit(task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
