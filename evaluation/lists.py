@@ -231,3 +231,6 @@ president_speakers.remove("melania trump")
 president_speakers.remove("laura bush")
 
 PRESIDENTS = president_speakers
+
+if __name__ == "__main__":
+    print(PRESIDENTS)

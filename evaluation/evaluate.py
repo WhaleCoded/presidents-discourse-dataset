@@ -19,12 +19,13 @@ def reduce_to_liwc_dictionary(tokens, liwc_dictionary):
     liwc_pronouns = []
 
     for token in tokens:
-        if token.lower() in liwc_dictionary:
-            liwc_pronouns.append(token.lower())
+        lower_token = token.lower()
+        if lower_token in liwc_dictionary:
+            liwc_pronouns.append(lower_token)
         else:
             # Check for tokens with variable endings
             for pronoun in liwc_dictionary:
-                if pronoun.endswith("*") and token.lower().startswith(pronoun[:-1]):
+                if pronoun.endswith("*") and lower_token.startswith(pronoun[:-1]):
                     liwc_pronouns.append(pronoun)
                     break
 
@@ -34,8 +35,9 @@ def reduce_to_custom_list(tokens):
     custom_pronouns = []
 
     for token in tokens:
-        if token.lower() in PRONOUNS:
-            custom_pronouns.append(token.lower())
+        lower_token = token.lower()
+        if lower_token in PRONOUNS:
+            custom_pronouns.append(lower_token)
 
     return custom_pronouns
 
