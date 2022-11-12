@@ -186,6 +186,9 @@ def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
             writer.writerow([pronoun, total_counts[pronoun], total_counts[pronoun] / total_pronoun])
 
 if __name__ == "__main__":
+    MAX_WORKERS = 12
+    MULTI_PROCESSING = False
+
     results_path = os.path.join(os.path.curdir, os.path.pardir, "results", "multi_re")
     if not os.path.exists(results_path):
         os.makedirs(results_path)
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     cleaned_dataset = clean_and_load_dataset()
 
     # Create Thread Pool
-    pool = ThreadPoolExecutor(max_workers=12)
+    pool = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
     def task(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path):
         # print(f"Processing {dictionary_name}-{dict_index+1}/{len(LIWC_DICTIONARIES)}")
@@ -202,4 +205,7 @@ if __name__ == "__main__":
         save_dictionary_results(dictionary_name, pronoun_counts, results_path)
 
     for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
-        pool.submit(task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
+        if MULTI_PROCESSING:
+            pool.submit(task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
+        else:
+            task(cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
