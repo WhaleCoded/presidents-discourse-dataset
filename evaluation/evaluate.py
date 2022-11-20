@@ -155,8 +155,8 @@ def save_raw_president_results(entry_counts, most_common_entries, header, save_p
             row = [president, most_common_entries[president]]
 
             counts = []
-            for header in header:
-                counts.append(counter[header])
+            for header_entry in header:
+                counts.append(counter[header_entry])
             row += counts + [sum(counts)]
             cleaned_president_counts[president] = row
 
@@ -187,8 +187,11 @@ def save_normalized_president_results(
             row = [president, most_common_entries[president]]
 
             props = []
-            for header in header:
-                props.append(counter[header] / total_words[president])
+            for header_entry in header:
+                if total_words[president] == 0:
+                    props.append(0)
+                else:
+                    props.append(counter[header_entry] / total_words[president])
 
             row = row + props + [sum(props)]
             proportion_counts[president] = row
@@ -214,12 +217,12 @@ def save_total_entry_results(entry_counts, header, save_path):
         )
         writer.writerow([])
         writer.writerow(["Pronoun", "Count", "Proportion"])
-        for pronoun in header:
+        for entry in header:
             writer.writerow(
                 [
-                    pronoun,
-                    total_counts[pronoun],
-                    total_counts[pronoun] / total_num_entries,
+                    entry,
+                    total_counts[entry],
+                    total_counts[entry] / total_num_entries,
                 ]
             )
 
