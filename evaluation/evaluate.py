@@ -42,15 +42,19 @@ def clean_and_load_dataset():
 
 # This function uses nltk to tokenize and counts the lowercase version of the tokens
 def tokenize_and_count_all_documents(cleaned_dataset):
-    token_counts = Counter()
+    token_counts_by_president = {}
+    for president in PRESIDENTS:
+        token_counts_by_president[president] = Counter()
 
     # Tokenize and count all documents
     for data in tqdm(cleaned_dataset, desc="Tokenizing and counting all documents"):
         tokens = nltk.word_tokenize(data["body"])
         tokens = [token.lower() for token in tokens]
-        token_counts += Counter(tokens)
+        token_counter = Counter(tokens)
 
-    return token_counts
+        token_counts_by_president[data["speaker"]] += token_counter
+
+    return token_counts_by_president
 
 
 def reduce_to_liwc_dictionary(token_counts, liwc_dictionary, available_re):
@@ -222,55 +226,85 @@ def save_total_entry_results(entry_counts, header, save_path):
 
 def save_dictionary_results(config, save_path):
     dictionary_name = config["dictionary_name"]
-    entry_counts = config["entry_counts"]
+    entry_counts_by_president = config["entry_counts_by_president"]
 
     results_path = os.path.join(save_path, "all_dictionaries", dictionary_name)
     os.makedirs(results_path, exist_ok=True)
 
-    final_header = get_entry_header(entry_counts)
+    final_header = get_entry_header(entry_counts_by_president)
 
     most_common_pronouns = {}
-    for speaker, counter in entry_counts.items():
+    for speaker, counter in entry_counts_by_president.items():
         most_common_pronouns[speaker] = get_most_common_entry(counter)
 
     # Save different variations of the results
     save_raw_president_results(
-        entry_counts, most_common_pronouns, final_header, results_path
+        entry_counts_by_president, most_common_pronouns, final_header, results_path
     )
 
     save_normalized_president_results(
-        entry_counts, most_common_pronouns, final_header, results_path
+        entry_counts_by_president, most_common_pronouns, final_header, results_path
     )
 
-    save_total_entry_results(entry_counts, final_header, results_path)
+    save_total_entry_results(entry_counts_by_president, final_header, results_path)
 
 
 def run_counts_for_dictionary(config):
-    token_counts = config["token_counts"]
+    token_counts_by_president = config["token_counts_by_president"]
     lwic_dictionary = config["liwc_dictionary"]
     availabel_re = create_re_from_dictionary(lwic_dictionary)
 
     # Reduce to LIWC entries
-    liwc_entries = reduce_to_liwc_dictionary(
-        token_counts, lwic_dictionary, availabel_re
-    )
+    lwic_entries_by_president = {}
+    for president, token_counts in token_counts_by_president.items():
+        lwic_entries_by_president[president] = reduce_to_liwc_dictionary(
+            token_counts, lwic_dictionary, availabel_re
+        )
 
-    return {"entry_counts": liwc_entries, "dictionary_name": config["dictionary_name"]}
+    return {
+        "entry_counts_by_president": lwic_entries_by_president,
+        "dictionary_name": config["dictionary_name"],
+    }
 
 
 def dictionary_analysis_generator():
     p_bar = tqdm(total=len(LIWC_DICTIONARIES))
 
-    # Load the dataset
-    p_bar.set_postfix_str("Cleaning and Loading President Data")
-    cleaned_dataset = clean_and_load_dataset()
-    p_bar.set_postfix_str("Tokenizing President Data")
-    token_counts = tokenize_and_count_all_documents(cleaned_dataset)
+    # Calculate or load the token counts
+    path_to_all_tokens = os.path.join(
+        os.path.curdir,
+        os.pardir,
+        "data",
+        "all_president_tokens",
+        "all_president_tokens.json",
+    )
+    os.makedirs(os.path.dirname(path_to_all_tokens), exist_ok=True)
 
-    p_bar.set_postfix_str("Analyzing Pronouns")
+    if os.path.exists(path_to_all_tokens):
+        with open(path_to_all_tokens, "r") as f:
+            all_tokens = json.load(f)
+
+        token_counts_by_president = {}
+        for president, tokens in all_tokens.items():
+            president_counter = Counter()
+            for token, count in tokens.items():
+                president_counter[token] = count
+
+            token_counts_by_president[president] = president_counter
+    else:
+        p_bar.set_postfix_str("Cleaning and Loading President Data")
+        cleaned_dataset = clean_and_load_dataset()
+        p_bar.set_postfix_str("Tokenizing President Data")
+        token_counts_by_president = tokenize_and_count_all_documents(cleaned_dataset)
+
+        # Save the token counts
+        with open(path_to_all_tokens, "w+") as f:
+            json.dump(token_counts_by_president, f)
+
+    p_bar.set_postfix_str("Analyzing Dictionaries")
     for dictionary_name, lwic_dictionary in LIWC_DICTIONARIES.items():
         config = {}
-        config["token_counts"] = token_counts
+        config["token_counts_by_president"] = token_counts_by_president
         config["liwc_dictionary"] = lwic_dictionary
         config["dictionary_name"] = dictionary_name
 
