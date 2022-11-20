@@ -22,6 +22,12 @@ def create_re_from_dictionary(liwc_dictionary):
 def clean_and_load_dataset():
     dataset = PresidentsDataset()
 
+    # Grab just the documents in the presidential category and presidential speaker
+    dataset.where(
+        lambda data: "Presidential" in data["categories"]["primary"]
+        and data["speaker"].lower() in PRESIDENTS
+    )
+
     def thin_data(data):
         return {
             "slug": data["slug"],
@@ -30,12 +36,6 @@ def clean_and_load_dataset():
         }
 
     dataset.map(thin_data)
-
-    # Grab just the documents in the presidential category and presidential speaker
-    dataset.where(
-        lambda data: "Presidential" in data["categories"]["primary"]
-        and data["speaker"] in PRESIDENTS
-    )
 
     return dataset
 
@@ -220,8 +220,11 @@ def save_total_entry_results(entry_counts, header, save_path):
             )
 
 
-def save_dictionary_results(dictionary_name, entry_counts, results_path):
-    results_path = os.path.join(results_path, "all_dictionaries", dictionary_name)
+def save_dictionary_results(config, save_path):
+    dictionary_name = config["dictionary_name"]
+    entry_counts = config["entry_counts"]
+
+    results_path = os.path.join(save_path, "all_dictionaries", dictionary_name)
     os.makedirs(results_path, exist_ok=True)
 
     final_header = get_entry_header(entry_counts)
@@ -252,47 +255,59 @@ def run_counts_for_dictionary(config):
         token_counts, lwic_dictionary, availabel_re
     )
 
-    dictionary_name = config["dictionary_name"]
-    save_path = config["save_path"]
-
-    # Save the counts
-    save_dictionary_results(liwc_entries, dictionary_name, save_path)
+    return {"entry_counts": liwc_entries, "dictionary_name": config["dictionary_name"]}
 
 
-def dictionary_analysis_generator(save_path: os.PathLike):
+def dictionary_analysis_generator():
+    p_bar = tqdm(total=len(LIWC_DICTIONARIES))
+
     # Load the dataset
+    p_bar.set_postfix_str("Cleaning and Loading President Data")
     cleaned_dataset = clean_and_load_dataset()
+    p_bar.set_postfix_str("Tokenizing President Data")
     token_counts = tokenize_and_count_all_documents(cleaned_dataset)
 
+    p_bar.set_postfix_str("Analyzing Pronouns")
     for dictionary_name, lwic_dictionary in LIWC_DICTIONARIES.items():
         config = {}
         config["token_counts"] = token_counts
         config["liwc_dictionary"] = lwic_dictionary
         config["dictionary_name"] = dictionary_name
-        config["save_path"] = save_path
 
         yield config
+
+        p_bar.update(1)
 
 
 if __name__ == "__main__":
     MAX_WORKERS = mp.cpu_count() - 1
     MULTI_PROCESSING = True
-    SAVE_PATH = os.path.join(os.path.curdir, os.path.pardir, "results", "multi_re")
+    SAVE_PATH = os.path.join(
+        os.path.curdir, os.path.pardir, "results", "efficient_multi_re"
+    )
 
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save_path", type=os.PathLike, default=SAVE_PATH)
+    parser.add_argument("--save_path", default=SAVE_PATH)
     parser.add_argument("--multi_processing", type=bool, default=MULTI_PROCESSING)
-    parser.add_argument("--num_threads", type=int, default=mp.cpu_count())
+    parser.add_argument("--num_threads", type=int, default=MAX_WORKERS)
     args = vars(parser.parse_args())
-
     os.makedirs(args["save_path"], exist_ok=True)
 
-    with mp.Pool(args["num_threads"], maxtasksperchild=1) as pool:
-        pool.imap_unordered(
-            run_counts_for_dictionary, dictionary_analysis_generator(args["save_path"])
+    if not args["multi_processing"]:
+        num_threads = 1
+    else:
+        num_threads = args["num_threads"]
+
+    with mp.Pool(num_threads, maxtasksperchild=1) as pool:
+        results = pool.imap_unordered(
+            run_counts_for_dictionary, dictionary_analysis_generator()
         )
+
+        # This starts the analysis and saves the results as they are completed
+        for result in results:
+            save_dictionary_results(result, args["save_path"])
 
     # Load the presidents dataset
     # cleaned_dataset = clean_and_load_dataset()
