@@ -226,6 +226,9 @@ def save_total_entry_results(entry_counts, header, save_path):
                 ]
             )
 
+        writer.writerow([])
+        writer.writerow(["Total", total_num_entries, 1])
+
 
 def save_dictionary_results(config, save_path):
     dictionary_name = config["dictionary_name"]
