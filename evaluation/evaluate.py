@@ -2,48 +2,15 @@ import os
 import json
 import csv
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor
+import multiprocessing as mp
 import re
 
 from tqdm import tqdm
 import nltk
 
-from lists import PRESIDENTS, LIWC_DICTIONARIES, PRONOUNS
+from lists import PRESIDENTS, LIWC_DICTIONARIES
 from dataset import PresidentsDataset
 
-def reduce_to_nltk_pronouns(tokens):
-    pos_tags = nltk.pos_tag(tokens)
-
-    # Remove non-pronouns
-    pronoun_tokens = [word.lower() for word, pos in pos_tags if "PRP" in pos or pos == "WP"]
-
-    return pronoun_tokens
-
-def reduce_to_custom_list(tokens):
-    custom_pronouns = []
-
-    for token in tokens:
-        lower_token = token.lower()
-        if lower_token in PRONOUNS:
-            custom_pronouns.append(lower_token)
-
-    return custom_pronouns
-
-def reduce_to_liwc_dictionary(tokens, liwc_dictionary, available_re):
-    liwc_pronouns = []
-
-    for token in tokens:
-        lower_token = token.lower()
-        if lower_token in liwc_dictionary:
-            liwc_pronouns.append(lower_token)
-        else:
-            # Check for tokens with variable endings
-            match = available_re.match(lower_token)
-            if match:
-                liwc_pronouns.append(match[0])
-    
-    # We return the regular expression object because it keeps track of patterns that have already been matched
-    return liwc_pronouns, available_re
 
 def create_re_from_dictionary(liwc_dictionary):
     tokens_that_need_re = [token for token in liwc_dictionary if "*" in token]
@@ -51,36 +18,88 @@ def create_re_from_dictionary(liwc_dictionary):
 
     return re.compile(re_string)
 
+
 def clean_and_load_dataset():
     dataset = PresidentsDataset()
 
-    # Grab just the presidential documents
-    dataset.where(lambda data: "Presidential" in data["categories"]["primary"])
     def thin_data(data):
         return {
             "slug": data["slug"],
             "speaker": data["speaker"].lower(),
-            "body": data["body"]
+            "body": data["body"],
         }
+
     dataset.map(thin_data)
+
+    # Grab just the documents in the presidential category and presidential speaker
+    dataset.where(
+        lambda data: "Presidential" in data["categories"]["primary"]
+        and data["speaker"] in PRESIDENTS
+    )
 
     return dataset
 
-def get_counts_for_dictionary(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path):
-    pure_counts_path = os.path.join(results_path, "all_dictionaries", "counts", f"{dictionary_name}_pure_counts.json")
+
+# This function uses nltk to tokenize and counts the lowercase version of the tokens
+def tokenize_and_count_all_documents(cleaned_dataset):
+    token_counts = Counter()
+
+    # Tokenize and count all documents
+    for data in tqdm(cleaned_dataset, desc="Tokenizing and counting all documents"):
+        tokens = nltk.word_tokenize(data["body"])
+        tokens = [token.lower() for token in tokens]
+        token_counts += Counter(tokens)
+
+    return token_counts
+
+
+def reduce_to_liwc_dictionary(token_counts, liwc_dictionary, available_re):
+    available_tokens = token_counts.keys()
+    liwc_entries = Counter()
+
+    for token in available_tokens:
+        if token in liwc_dictionary:
+            liwc_entries[token] += token_counts[token]
+        else:
+            # Check for tokens with variable endings
+            match = available_re.match(token)
+            if match:
+                # Multiple token counts will match, so we need to keep a running total
+                if match[0] not in liwc_entries:
+                    liwc_entries[match[0]] = 0
+
+                liwc_entries[match[0]] += token_counts[token]
+
+    return liwc_entries
+
+
+def get_counts_for_dictionary(
+    cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path
+):
+    pure_counts_path = os.path.join(
+        results_path,
+        "all_dictionaries",
+        "counts",
+        f"{dictionary_name}_pure_counts.json",
+    )
     os.makedirs(os.path.dirname(pure_counts_path), exist_ok=True)
 
-    if not os.path.exists(pure_counts_path):    
+    if not os.path.exists(pure_counts_path):
         # Count the number of times each pronoun is used by each president
         pronoun_counts = {}
         dictionary_re = create_re_from_dictionary(liwc_dictionary)
-        for data in tqdm(cleaned_dataset, desc=f"Counting {dictionary_name}-{dict_index + 1}/{len(LIWC_DICTIONARIES)}"):
+        for data in tqdm(
+            cleaned_dataset,
+            desc=f"Counting {dictionary_name}-{dict_index + 1}/{len(LIWC_DICTIONARIES)}",
+        ):
             speaker = data["speaker"]
             if speaker in PRESIDENTS:
                 tokens = nltk.word_tokenize(data["body"])
 
                 # Reduce to LIWC pronouns
-                pronoun_tokens, dictionary_re = reduce_to_liwc_dictionary(tokens, liwc_dictionary, dictionary_re)
+                pronoun_tokens, dictionary_re = reduce_to_liwc_dictionary(
+                    tokens, liwc_dictionary, dictionary_re
+                )
 
                 # Keep running total of pronoun counts
                 if speaker not in pronoun_counts:
@@ -102,110 +121,198 @@ def get_counts_for_dictionary(cleaned_dataset, dictionary_name, dict_index, liwc
 
     return pronoun_counts
 
-def save_dictionary_results(dictionary_name, pronoun_counts, results_path):
-    results_path = os.path.join(results_path, "all_dictionaries", dictionary_name)
-    os.makedirs(results_path, exist_ok=True)
 
+def get_entry_header(dictionary_entry_counts):
     final_header = set()
-    for counter in pronoun_counts.values():
+    for counter in dictionary_entry_counts.values():
         header = set(counter.keys())
         final_header = final_header.union(header)
     final_header = sorted(list(final_header))
 
-    # Find the most common pronoun for each president
-    def get_most_common_pronoun(counter):
-        if len(counter) == 0:
-            return ""
-        return counter.most_common(1)[0][0]
+    return final_header
 
-    most_common_pronouns = {}
-    for speaker, counter in pronoun_counts.items():
-        most_common_pronouns[speaker] = get_most_common_pronoun(counter)
 
-    # Write the president counts to a CSV
-    presidents_path = os.path.join(results_path, "presidents.csv")
-    with open(presidents_path, "w+") as f:
+def get_most_common_entry(counter):
+    if len(counter) == 0:
+        return ""
+    return counter.most_common(1)[0][0]
+
+
+def save_raw_president_results(entry_counts, most_common_entries, header, save_path):
+    save_path = os.path.join(save_path, "raw_president_counts.csv")
+
+    with open(save_path, "w+") as f:
         writer = csv.writer(f)
-        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total"])
+        writer.writerow(["President"] + ["Most Used Pronoun"] + header + ["Total"])
 
         cleaned_president_counts = {}
-        sorted_names = sorted(list(pronoun_counts.keys()))
-        for president, counter in pronoun_counts.items():
-            row = [president, most_common_pronouns[president]]
+        sorted_names = sorted(list(entry_counts.keys()))
+        for president, counter in entry_counts.items():
+            row = [president, most_common_entries[president]]
 
             counts = []
-            for header in final_header:
+            for header in header:
                 counts.append(counter[header])
             row += counts + [sum(counts)]
             cleaned_president_counts[president] = row
 
-        #Make sure presidents are in alphabetical order
+        # Make sure presidents are in alphabetical order
         for president in sorted_names:
             writer.writerow(cleaned_president_counts[president])
 
-    # Write the pronoun proportions to a CSV
-    presidents_prop_path = os.path.join(results_path, "presidents_prop.csv")
-    with open(presidents_prop_path, "w+") as f:
+
+def save_normalized_president_results(
+    entry_counts, most_common_entries, header, save_path
+):
+    save_path = os.path.join(save_path, "normalized_president_counts.csv")
+    with open(save_path, "w+") as f:
         writer = csv.writer(f)
-        writer.writerow(["President"] + ["Most Used Pronoun"] + final_header + ["Total Proportion"])
+        writer.writerow(
+            ["President"] + ["Most Used Pronoun"] + header + ["Total Proportion"]
+        )
 
         # Get the total number of words spoken by each president
         total_words = {}
-        for president, counter in pronoun_counts.items():
+        for president, counter in entry_counts.items():
             total_words[president] = sum(counter.values())
 
         # Write the president counts to a CSV
         proportion_counts = {}
-        for president, counter in pronoun_counts.items():
-            row = [president, most_common_pronouns[president]]
+        sorted_names = sorted(list(entry_counts.keys()))
+        for president, counter in entry_counts.items():
+            row = [president, most_common_entries[president]]
 
             props = []
-            for header in final_header:
+            for header in header:
                 props.append(counter[header] / total_words[president])
 
             row = row + props + [sum(props)]
             proportion_counts[president] = row
 
-        #Make sure presidents are in alphabetical order
+        # Make sure presidents are in alphabetical order
         for president in sorted_names:
             writer.writerow(proportion_counts[president])
 
-    # Calculate the total pronoun counts
-    total_counts = Counter()
-    for counter in pronoun_counts.values():
-        total_counts += counter
-    total_pronoun = sum(total_counts.values())
 
-    total_path = os.path.join(results_path, "total.csv")
-    with open(total_path, "w+") as f:
+def save_total_entry_results(entry_counts, header, save_path):
+    save_path = os.path.join(save_path, "total_counts.csv")
+
+    # Calculate the total entries counts
+    total_counts = Counter()
+    for counter in entry_counts.values():
+        total_counts += counter
+    total_num_entries = sum(total_counts.values())
+
+    with open(save_path, "w+") as f:
         writer = csv.writer(f)
-        writer.writerow(["Most Frequently Used Pronoun:"] + [get_most_common_pronoun(total_counts)])
+        writer.writerow(
+            ["Most Frequently Used Pronoun:"] + [get_most_common_entry(total_counts)]
+        )
         writer.writerow([])
         writer.writerow(["Pronoun", "Count", "Proportion"])
-        for pronoun in final_header:
-            writer.writerow([pronoun, total_counts[pronoun], total_counts[pronoun] / total_pronoun])
+        for pronoun in header:
+            writer.writerow(
+                [
+                    pronoun,
+                    total_counts[pronoun],
+                    total_counts[pronoun] / total_num_entries,
+                ]
+            )
+
+
+def save_dictionary_results(dictionary_name, entry_counts, results_path):
+    results_path = os.path.join(results_path, "all_dictionaries", dictionary_name)
+    os.makedirs(results_path, exist_ok=True)
+
+    final_header = get_entry_header(entry_counts)
+
+    most_common_pronouns = {}
+    for speaker, counter in entry_counts.items():
+        most_common_pronouns[speaker] = get_most_common_entry(counter)
+
+    # Save different variations of the results
+    save_raw_president_results(
+        entry_counts, most_common_pronouns, final_header, results_path
+    )
+
+    save_normalized_president_results(
+        entry_counts, most_common_pronouns, final_header, results_path
+    )
+
+    save_total_entry_results(entry_counts, final_header, results_path)
+
+
+def run_counts_for_dictionary(config):
+    token_counts = config["token_counts"]
+    lwic_dictionary = config["liwc_dictionary"]
+    availabel_re = create_re_from_dictionary(lwic_dictionary)
+
+    # Reduce to LIWC entries
+    liwc_entries = reduce_to_liwc_dictionary(
+        token_counts, lwic_dictionary, availabel_re
+    )
+
+    dictionary_name = config["dictionary_name"]
+    save_path = config["save_path"]
+
+    # Save the counts
+    save_dictionary_results(liwc_entries, dictionary_name, save_path)
+
+
+def dictionary_analysis_generator(save_path: os.PathLike):
+    # Load the dataset
+    cleaned_dataset = clean_and_load_dataset()
+    token_counts = tokenize_and_count_all_documents(cleaned_dataset)
+
+    for dictionary_name, lwic_dictionary in LIWC_DICTIONARIES.items():
+        config = {}
+        config["token_counts"] = token_counts
+        config["liwc_dictionary"] = lwic_dictionary
+        config["dictionary_name"] = dictionary_name
+        config["save_path"] = save_path
+
+        yield config
+
 
 if __name__ == "__main__":
-    MAX_WORKERS = 12
-    MULTI_PROCESSING = False
+    MAX_WORKERS = mp.cpu_count() - 1
+    MULTI_PROCESSING = True
+    SAVE_PATH = os.path.join(os.path.curdir, os.path.pardir, "results", "multi_re")
 
-    results_path = os.path.join(os.path.curdir, os.path.pardir, "results", "multi_re")
-    if not os.path.exists(results_path):
-        os.makedirs(results_path)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--save_path", type=os.PathLike, default=SAVE_PATH)
+    parser.add_argument("--multi_processing", type=bool, default=MULTI_PROCESSING)
+    parser.add_argument("--num_threads", type=int, default=mp.cpu_count())
+    args = vars(parser.parse_args())
+
+    os.makedirs(args["save_path"], exist_ok=True)
+
+    with mp.Pool(args["num_threads"], maxtasksperchild=1) as pool:
+        pool.imap_unordered(
+            run_counts_for_dictionary, dictionary_analysis_generator(args["save_path"])
+        )
 
     # Load the presidents dataset
-    cleaned_dataset = clean_and_load_dataset()
+    # cleaned_dataset = clean_and_load_dataset()
 
-    # Create Thread Pool
-    pool = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+    # # Create Thread Pool
+    # pool = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
-    def task(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path):
-        # print(f"Processing {dictionary_name}-{dict_index+1}/{len(LIWC_DICTIONARIES)}")
-        pronoun_counts = get_counts_for_dictionary(cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path)
-        save_dictionary_results(dictionary_name, pronoun_counts, results_path)
+    # def task(
+    #     cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path
+    # ):
+    #     # print(f"Processing {dictionary_name}-{dict_index+1}/{len(LIWC_DICTIONARIES)}")
+    #     pronoun_counts = get_counts_for_dictionary(
+    #         cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path
+    #     )
+    #     save_dictionary_results(dictionary_name, pronoun_counts, results_path)
 
-    for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
-        if MULTI_PROCESSING:
-            pool.submit(task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
-        else:
-            task(cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
+    # for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
+    #     if MULTI_PROCESSING:
+    #         pool.submit(
+    #             task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path
+    #         )
+    #     else:
+    #         task(cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
