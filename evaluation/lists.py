@@ -2,9 +2,7 @@ import csv
 import os
 
 # Load all the LIWC dictionaries
-relative_path = os.path.join(
-    os.path.curdir, "evaluation", "cleaned_liwc_dictionaries.csv"
-)
+relative_path = os.path.join(os.path.curdir, "cleaned_liwc_dictionaries.csv")
 with open(relative_path, "r") as f:
     reader = csv.reader(f)
 

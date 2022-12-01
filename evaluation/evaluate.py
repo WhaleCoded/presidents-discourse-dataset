@@ -14,7 +14,9 @@ from dataset import PresidentsDataset
 
 def create_re_from_dictionary(liwc_dictionary):
     tokens_that_need_re = [token for token in liwc_dictionary if "*" in token]
-    re_string = "|".join([token.replace("*", ".*?") for token in tokens_that_need_re])
+    re_string = "|".join(
+        ["\b" + token.replace("*", ".*?") + "\b" for token in tokens_that_need_re]
+    )
 
     return re.compile(re_string)
 
@@ -323,7 +325,7 @@ if __name__ == "__main__":
     MAX_WORKERS = mp.cpu_count() - 1
     MULTI_PROCESSING = True
     SAVE_PATH = os.path.join(
-        os.path.curdir, os.path.pardir, "results", "efficient_multi_re"
+        os.path.curdir, os.path.pardir, "results", "word_boundary_multi_re"
     )
 
     import argparse
