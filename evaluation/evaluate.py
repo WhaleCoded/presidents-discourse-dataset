@@ -18,6 +18,9 @@ def create_re_from_dictionary(liwc_dictionary):
         ["\b" + token.replace("*", ".*?") + "\b" for token in tokens_that_need_re]
     )
 
+    if re_string == "":
+        return None
+
     return re.compile(re_string)
 
 
@@ -66,7 +69,7 @@ def reduce_to_liwc_dictionary(token_counts, liwc_dictionary, available_re):
     for token in available_tokens:
         if token in liwc_dictionary:
             liwc_entries[token] += token_counts[token]
-        else:
+        elif available_re is not None:
             # Check for tokens with variable endings
             match = available_re.match(token)
             if match:
@@ -321,55 +324,236 @@ def dictionary_analysis_generator():
         p_bar.update(1)
 
 
+def load_token_counts_by_president():
+    path_to_all_tokens = os.path.join(
+        os.path.curdir,
+        os.pardir,
+        "data",
+        "all_president_tokens",
+        "all_president_tokens.json",
+    )
+    os.makedirs(os.path.dirname(path_to_all_tokens), exist_ok=True)
+
+    if os.path.exists(path_to_all_tokens):
+        with open(path_to_all_tokens, "r") as f:
+            all_tokens = json.load(f)
+
+        token_counts_by_president = {}
+        for president, tokens in all_tokens.items():
+            president_counter = Counter()
+            for token, count in tokens.items():
+                president_counter[token] = count
+
+            token_counts_by_president[president] = president_counter
+    else:
+        cleaned_dataset = clean_and_load_dataset()
+        token_counts_by_president = tokenize_and_count_all_documents(cleaned_dataset)
+
+        # Save the token counts
+        with open(path_to_all_tokens, "w+") as f:
+            json.dump(token_counts_by_president, f)
+
+    return token_counts_by_president
+
+
+def save_all_dictionaries_raw_counts(
+    dictionary_order, president_names, num_lwic_entries_used_by_dictionary
+):
+    file_name = "all_dictionaries_raw_counts.csv"
+    file_path = os.path.join(args["save_path"], file_name)
+
+    with open(file_path, "w+") as f:
+        csv_writer = csv.writer(f)
+
+        csv_writer.writerow(["LIWC", "President: Raw Counts"])
+        csv_writer.writerow(["Dictionary Names"] + president_names)
+
+        # Write the raw counts
+        for dictionary_name in dictionary_order:
+            row = [dictionary_name]
+            if dictionary_name in num_lwic_entries_used_by_dictionary:
+                dictionary_counts = num_lwic_entries_used_by_dictionary[dictionary_name]
+
+                for president in president_names:
+                    row.append(dictionary_counts[president])
+            else:
+                print(f"Dictionary {dictionary_name} not found")
+
+            csv_writer.writerow(row)
+
+
+def save_all_dictionaries_strict_raw_counts(
+    dictionary_order, num_lwic_entries_used_by_dictionary
+):
+    file_name = "strict_all_dictionaries_raw_counts.csv"
+    file_path = os.path.join(args["save_path"], file_name)
+
+    with open(file_path, "w+") as f:
+        csv_writer = csv.writer(f)
+
+        csv_writer.writerow(["LIWC", "President: Raw Counts"])
+        csv_writer.writerow(["Dictionary Names", "Total Count"])
+
+        # Write the raw counts
+        for dictionary_name in dictionary_order:
+            row = [dictionary_name]
+            if dictionary_name in num_lwic_entries_used_by_dictionary:
+                dictionary_counts = num_lwic_entries_used_by_dictionary[dictionary_name]
+
+                row.append(sum(dictionary_counts.values()))
+            else:
+                print(f"Dictionary {dictionary_name} not found")
+
+            csv_writer.writerow(row)
+
+
+def save_all_dictionaries_normalized_counts(
+    dictionary_order,
+    president_names,
+    num_lwic_entries_used_by_dictionary,
+    total_token_counts_by_president,
+):
+    file_name = "all_dictionaries_normalized_counts.csv"
+    file_path = os.path.join(args["save_path"], file_name)
+
+    with open(file_path, "w+") as f:
+        csv_writer = csv.writer(f)
+
+        csv_writer.writerow(["LIWC", "President: Raw Counts"])
+        csv_writer.writerow(["Dictionary Names"] + president_names)
+
+        # Write the raw counts
+        for dictionary_name in dictionary_order:
+            row = [dictionary_name]
+            if dictionary_name in num_lwic_entries_used_by_dictionary:
+                dictionary_counts = num_lwic_entries_used_by_dictionary[dictionary_name]
+
+                for president in president_names:
+                    normalized_prop = (
+                        dictionary_counts[president]
+                        / total_token_counts_by_president[president]
+                    )
+                    row.append(normalized_prop)
+            else:
+                print(f"Dictionary {dictionary_name} not found")
+
+            csv_writer.writerow(row)
+
+
+def save_all_dictionaries_strict_normalized_counts(
+    dictionary_order,
+    num_lwic_entries_used_by_dictionary,
+    total_token_counts_by_president,
+):
+    file_name = "strict_all_dictionaries_normalized_counts.csv"
+    file_path = os.path.join(args["save_path"], file_name)
+
+    total_tokens = sum(total_token_counts_by_president.values())
+
+    with open(file_path, "w+") as f:
+        csv_writer = csv.writer(f)
+
+        csv_writer.writerow(["LIWC", "President: Normalized Counts"])
+        csv_writer.writerow(["Dictionary Names", "Total Count"])
+
+        # Write the raw counts
+        for dictionary_name in dictionary_order:
+            row = [dictionary_name]
+            if dictionary_name in num_lwic_entries_used_by_dictionary:
+                dictionary_counts = num_lwic_entries_used_by_dictionary[dictionary_name]
+                normalized_count = sum(dictionary_counts.values()) / total_tokens
+                row.append(normalized_count)
+            else:
+                print(f"Dictionary {dictionary_name} not found")
+
+            csv_writer.writerow(row)
+
+
 if __name__ == "__main__":
     MAX_WORKERS = mp.cpu_count() - 1
     MULTI_PROCESSING = True
     SAVE_PATH = os.path.join(
-        os.path.curdir, os.path.pardir, "results", "word_boundary_multi_re"
+        os.path.curdir, os.path.pardir, "results", "strict_counts_w_normalization"
     )
 
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--save_path", default=SAVE_PATH)
-    parser.add_argument("--multi_processing", type=bool, default=MULTI_PROCESSING)
+    parser.add_argument("--multi_processing", action="store_true")
     parser.add_argument("--num_threads", type=int, default=MAX_WORKERS)
     args = vars(parser.parse_args())
     os.makedirs(args["save_path"], exist_ok=True)
 
     if not args["multi_processing"]:
-        num_threads = 1
+        print("Not using multiprocessing")
+        token_counts_by_president = load_token_counts_by_president()
+
+        # Get total counts for normalization later
+        total_token_counts_by_president = {}
+        for president, token_counts in token_counts_by_president.items():
+            total_token_counts_by_president[president] = sum(token_counts.values())
+
+        num_lwic_entries_used_by_dictionary = {}
+        for dictionary_name, lwic_dictionary in tqdm(
+            LIWC_DICTIONARIES.items(), desc="Analyzing Dictionaries"
+        ):
+            config = {}
+            config["token_counts_by_president"] = token_counts_by_president
+            config["liwc_dictionary"] = lwic_dictionary
+            config["dictionary_name"] = dictionary_name
+
+            # Reduce to LIWC tokens for specific dictionary
+            result_dict = run_counts_for_dictionary(config)
+
+            # Get total tokens that belong to liwc dictionary
+            dictionary_token_totals_by_president = {}
+            for president, token_counts in result_dict[
+                "entry_counts_by_president"
+            ].items():
+                dictionary_token_totals_by_president[president] = sum(
+                    token_counts.values()
+                )
+
+            num_lwic_entries_used_by_dictionary[
+                dictionary_name
+            ] = dictionary_token_totals_by_president
+
+        # Save results
+        from lists import LIWC_OFFICIAL_ORDER
+
+        president_names = sorted(list(PRESIDENTS))
+        dictionary_order = LIWC_OFFICIAL_ORDER
+
+        # Save the raw counts
+        save_all_dictionaries_raw_counts(
+            dictionary_order, president_names, num_lwic_entries_used_by_dictionary
+        )
+        save_all_dictionaries_strict_raw_counts(
+            dictionary_order, num_lwic_entries_used_by_dictionary
+        )
+
+        # Save the normalized counts
+        save_all_dictionaries_normalized_counts(
+            dictionary_order,
+            president_names,
+            num_lwic_entries_used_by_dictionary,
+            total_token_counts_by_president,
+        )
+        save_all_dictionaries_strict_normalized_counts(
+            dictionary_order,
+            num_lwic_entries_used_by_dictionary,
+            total_token_counts_by_president,
+        )
+
     else:
         num_threads = args["num_threads"]
 
-    with mp.Pool(num_threads, maxtasksperchild=1) as pool:
-        results = pool.imap_unordered(
-            run_counts_for_dictionary, dictionary_analysis_generator()
-        )
+        with mp.Pool(num_threads, maxtasksperchild=1) as pool:
+            results = pool.imap_unordered(
+                run_counts_for_dictionary, dictionary_analysis_generator()
+            )
 
-        # This starts the analysis and saves the results as they are completed
-        for result in results:
-            save_dictionary_results(result, args["save_path"])
-
-    # Load the presidents dataset
-    # cleaned_dataset = clean_and_load_dataset()
-
-    # # Create Thread Pool
-    # pool = ThreadPoolExecutor(max_workers=MAX_WORKERS)
-
-    # def task(
-    #     cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path
-    # ):
-    #     # print(f"Processing {dictionary_name}-{dict_index+1}/{len(LIWC_DICTIONARIES)}")
-    #     pronoun_counts = get_counts_for_dictionary(
-    #         cleaned_dataset, dictionary_name, dict_index, liwc_dictionary, results_path
-    #     )
-    #     save_dictionary_results(dictionary_name, pronoun_counts, results_path)
-
-    # for i, (dictionary_name, liwc_dictionary) in enumerate(LIWC_DICTIONARIES.items()):
-    #     if MULTI_PROCESSING:
-    #         pool.submit(
-    #             task, cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path
-    #         )
-    #     else:
-    #         task(cleaned_dataset, dictionary_name, i, liwc_dictionary, results_path)
+            # This starts the analysis and saves the results as they are completed
+            for result in results:
+                save_dictionary_results(result, args["save_path"])
