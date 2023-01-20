@@ -15,7 +15,7 @@ from dataset import PresidentsDataset
 def create_re_from_dictionary(liwc_dictionary):
     tokens_that_need_re = [token for token in liwc_dictionary if "*" in token]
     re_string = "|".join(
-        ["\b" + token.replace("*", ".*?") + "\b" for token in tokens_that_need_re]
+        [r"\b" + token.replace("*", ".*?") + r"\b" for token in tokens_that_need_re]
     )
 
     if re_string == "":
@@ -53,7 +53,7 @@ def tokenize_and_count_all_documents(cleaned_dataset):
 
     # Tokenize and count all documents
     for data in tqdm(cleaned_dataset, desc="Tokenizing and counting all documents"):
-        tokens = nltk.word_tokenize(data["body"])
+        tokens = nltk.word_tokenize(data["body"].lower())
         tokens = [token.lower() for token in tokens]
         token_counter = Counter(tokens)
 
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     MAX_WORKERS = mp.cpu_count() - 1
     MULTI_PROCESSING = True
     SAVE_PATH = os.path.join(
-        os.path.curdir, os.path.pardir, "results", "strict_counts_w_normalization"
+        os.path.curdir, os.path.pardir, "results", "new_strict_counts_w_normalization"
     )
 
     import argparse
