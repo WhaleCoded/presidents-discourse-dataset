@@ -1,0 +1,709 @@
+Modified MFT Dictionary				
+For Congressional Record Databases (Congressional Speeches)				
+				
+				
+				
+				
+%				
+0                      Core Word (must remain in all dynamic dictionaries)				
+01                    HarmVirtue				
+02                    HarmVice				
+03                    FairnessVirtue				
+04                    FairnessVice				
+05                    IngroupVirtue				
+06                    IngroupVice				
+07                    AuthorityVirtue				
+08                    AuthorityVice				
+09                   Institutional PurityVirtue				
+10                   Institutional PurityVice				
+11                   Sexual PurityVice				
+12                   Sexual PurityVice				
+				
+%				
+				
+				
+stem	Core	category 1	category 2	category 3
+benefit        		1		
+benefits		1		
+benefitted		1		
+care	0	1		
+caring	0	1		
+charity	0	1		
+compassion	0	1		
+compassionate		1		
+defend		1		
+defended		1		
+defends		1		
+dignity		1	9	
+forgive	0	1		
+forgiven	0	1		
+forgives	0	1		
+heal	0	1		
+kindness		1		
+love		1		
+merciful		1		
+mercy		1		
+needy		1		
+pity		1		
+poverty	0	1		
+preservation		1		
+preserve		1		
+preserves		1		
+protect	0	1		
+protects	0	1		
+refuge		1		
+respect		1	7	9
+respected		1	7	9
+respectful		1	7	9
+respects		1	7	9
+safe		1		
+sensitive		1		
+serve		1	7	
+service		1		
+shelter		1		
+shield		1		
+shields		1		
+sympathetic	0	1		
+sympathy	0	1		
+welfare		1		
+abandon		2		
+abandoned		2		
+abandons		2		
+abuse	0	2	10	
+abusive	0	2	10	
+addict		2		
+addiction		2		
+affliction		2		
+anguish 		2		
+attack	0	2		
+attacked	0	2		
+bigot		2	4	
+bigoted		2	4	
+condemned		2		
+crime	0	2	10	
+cruel		2		
+deceived		2	10	
+deceiver		2	10	
+deceiving		2	10	
+degradation		2		
+degraded		2		
+denial		2		
+harm	0	2		
+harmed	0	2		
+harmful	0	2		
+hate	0	2		
+hated	0	2		
+hateful	0	2		
+hurt	0	2		
+hurtful	0	2		
+indifferent		2	10	
+insensitive		2		
+killed		2		
+malice	0	2	10	
+murder		2		
+murdered		2		
+offensive		2		
+oppression	0	2		
+pain		2		
+persecuted		2		
+persecution		2		
+punish		2		
+punished		2		
+punishment		2		
+racist		2	4	
+ridicule		2		
+sorrow		2		
+suffer	0	2		
+suffered	0	2		
+suffering	0	2		
+threat		2		
+threaten		2		
+torture		2		
+tortured		2		
+tyranny		2		
+aboveboard		3	9	
+balance		3		
+balanced	0	3		
+consistent		3		
+consistently		3		
+constant		3		
+deserve		3		
+deserved		3		
+deserving		3		
+egalitarian		3		
+equable		3		
+equal	0	3		
+equality	0	3		
+equals	0	3		
+equity	0	3		
+equivalent		3		
+evenhanded		3		
+even-handed		3		
+fairly	0	3		
+fair-minded		3	9	
+fairness		3		
+fairplay	0	3		
+impartial	0	3	9	
+impartiality	0	3	9	
+impartially	0	3	9	
+impersonal		3		
+justice	0	3		
+justifiable		3		
+justified		3		
+lawful	0	3	9	
+merit		3		
+merited 		3		
+nonpartisan	0	3		
+open-minded		3		
+principled		3	9	
+proper		3		
+reasonable		3	9	
+reciprocal		3		
+reciprocity		3		
+redistribution		3		
+redress		3		
+reparation		3		
+rightful	0	3		
+rights		3		
+tolerance		3		
+tolerate		3		
+unbiased	0	3	9	
+unprejudiced		3	9	
+upright		3	9	
+warranted		3		
+arbitrary		4		
+bias	0	4	10	
+biased	0	4	10	
+corrupt	0	4	10	
+corrupted		4	10	
+discriminated		4		
+discrimination	0	4		
+dishonest	0	4	10	
+excluded		4	6	
+favoritism		4	10	
+favoritisms		4	10	
+improper		4	8	10
+inequality	0	4		
+inequitable	0	4	10	
+inequitably	0	4		
+injustice	0	4		
+partisan	0	4	10	
+preference		4		
+prejudice	0	4	10	
+prejudiced	0	4	10	
+segregated	0	4	6	
+undeserved		4		
+unearned		4		
+unequal		4		
+unfair	0	4		
+unfairly	0	4		
+unjust	0	4	10	
+unjustly	0	4		
+unprincipled		4	10	
+unscrupulous		4	10	
+unwarranted		4		
+accord		5		
+adherents		5		
+allegiance		5	7	
+allies		5		
+ally		5		
+American	0	5		
+Americans	0	5		
+belong	0	5		
+belonging	0	5		
+belongs	0	5		
+brotherhood		5		
+cadre		5		
+clique		5		
+collective		5		
+communal		5		
+commune		5		
+communitarian		5		
+community		5		
+concordant		5		
+conform		5	7	
+conformed		5	7	
+conforms		5	7	
+covenant		5		
+democrat	0	5		
+devoted		5	7	
+faithful		5	7	
+familial		5		
+fatherland	0	5		
+fellowship		5		
+fidelity		5	9	11
+fraternity		5		
+friend		5		
+friendship		5		
+group		5		
+guild		5		
+harmonious		5	9	
+harmony		5		
+insider		5		
+loyal	0	5		
+loyalty	0	5	7	
+member	0	5		
+membership	0	5		
+nation	0	5		
+neighbor		5		
+party	0	5		
+patriot	0	5	7	
+patriotic	0	5	7	
+patriotism	0	5	7	
+peacemaker		5		
+people		5		
+reconcile		5		
+republic		5		
+republican	0	5		
+solidarity		5		
+together		5		
+traditional		5	7	
+unison		5		
+unite		5		
+unity	0	5		
+unum		5		
+alienate	0	6	8	
+alienated	0	6	8	
+animosity		6		
+apostasy		6	8	10
+apostate		6	8	10
+astray		6		
+betray	0	6		
+betrayal	0	6	8	10
+betrayed	0	6	8	10
+breach		6	8	10
+contention		6		
+contentions		6		
+cross-purpose		6		
+deserted		6	8	
+deserter		6	8	
+deserters		6	8	
+discord		6		
+disloyal	0	6	8	10
+disloyalty	0	6	8	
+disputation		6		
+disputations		6		
+disputed		6		
+disrupt		6		
+disruption		6		
+dissension		6		
+dissensions		6		
+disunion		6		
+disunited		6		
+division		6		
+divisions		6		
+enmity		6		
+excommunicated		6		
+excommunication		6		
+immigrant		6		
+imposter		6		
+litigious		6		
+loggerheads		6		
+miscreant		6		
+misunderstanding		6		
+opposition		6		
+outsider		6		
+polemic		6		
+quarrel		6	10	
+quarrels		6	10	
+rancor		6		
+renegade		6	8	
+rupture		6		
+spy		6		
+subversive	0	6	8	
+traitor		6		
+traitorous	0	6		
+traitors	0	6		
+treacherous		6	10	
+treachery		6	10	
+treason	0	6	8	
+treasonous	0	6	8	
+unpatriotic	0	6	8	10
+unreconcilable		6		
+vindictive		6		
+accordance		7		
+accountability		7		
+accountable		7	9	
+authoritative	0	7		
+authority	0	7	9	
+awe		7		
+behoove		7		
+behooves		7		
+caste		7		
+castes		7		
+class		7		
+command	0	7		
+commanded	0	7		
+commands		7		
+compliance	0	7		
+comply		7		
+conscientious		7		
+conscientiously		7		
+constitutional	0	7	9	
+control		7		
+controlling		7		
+decorum		7	9	
+defer		7		
+deferential		7		
+deferred		7		
+devotedly		7		
+diligent		7		
+diligently		7		
+dutiful		7		
+duty	0	7		
+enjoin		7		
+father		7		
+fealty		7		
+fitness		7		
+governable		7		
+hierarchy	0	7		
+honor		7	9	
+honorable		7	9	
+kotow		7		
+leader	0	7		
+leadership	0	7	9	
+oath		7		
+obedience	0	7		
+obediently	0	7		
+obeisance		7		
+obey	0	7		
+obeyed	0	7		
+obligated	0	7		
+obligation	0	7		
+observance		7		
+office		7		
+order		7		
+permission		7		
+permit		7		
+pledge		7		
+pledged		7		
+position		7		
+preside		7		
+presidency		7		
+presiding		7		
+procedure		7		
+procedures		7		
+propriety		7		
+rank		7		
+revere		7		
+revered		7		
+reverence		7	9	
+reverent		7		
+reveres		7		
+sovereign		7		
+sovereignty		7		
+status		7		
+submissive		7		
+supremacy		7		
+tradition	0	7		
+traditionally	0	7		
+venerate		7		
+venerated		7		
+worship		7		
+agitate	0	8	10	
+agitated	0	8	10	
+agitation	0	8	10	
+anarchy		8		
+blaspheme		8		
+blasphemed		8		
+blasphemous		8		
+defect		8		
+defected		8		
+defector		8		
+defiance	0	8		
+defiant	0	8		
+defy	0	8		
+denounce		8		
+dereliction		8		
+disobedient	0	8		
+disobey	0	8		
+disobeyed	0	8		
+disrespect	0	8	10	
+disrespected	0	8	10	
+disrespectful	0	8	10	
+dissent		8		
+dissented		8		
+dissention		8		
+dissident		8		
+heretic		8		
+heretical		8		
+insubordinate	0	8		
+insubordination	0	8		
+insurgency		8		
+irreverent		8		
+lawless	0	8	10	
+lawlessness		8	10	
+mutinous		8		
+noncompliant		8		
+nonconformist		8		
+obstructionist		8	10	
+oppositional		8		
+pride	0	8	10	
+prideful	0	8	10	
+protest		8		
+rebel		8		
+rebellion	0	8		
+refuse		8		
+remonstrate		8		
+revolutionary		8		
+riot		8		
+rioting		8		
+sedition		8		
+ungovernable		8		
+violate		8		
+violated		8		
+violation		8		
+civic	0	9		
+colleague		9		
+collegial	0	9		
+courteous		9		
+decent		9		
+decently		9		
+disinterestedness		9		
+efficacious		9		
+ethic		9		
+ethical	0	9		
+ethically	0	9		
+ethics	0	9		
+exactness		9		
+genuine		9		
+genuinely		9		
+good-faith		9		
+goodness		9		
+guileless		9		
+honest	0	9		
+honestly	0	9		
+honesty	0	9		
+ideal		9		
+immaculate		9		
+impeccable		9		
+incorruptible		9		
+independent	0	9		
+innocence		9		
+innocent		9		
+integrity	0	9		
+inviolable		9		
+judicious	0	9		
+legitimate	0	9		
+moral	0	9		
+polite	0	9		
+politeness		9		
+pure		9		
+purity		9		
+rectitude		9		
+refined		9		
+righteous		9		
+sacred		9		
+sanctify		9		
+sinless		9		
+spotless		9		
+straightforward		9		
+transparent		9		
+trustworthy		9		
+truthful	0	9		
+unadulterated		9		
+uncontaminated		9		
+uncorrupted		9		
+undefiled		9		
+undiluted		9		
+unimpeachable		9		
+unsoiled		9		
+unstained		9		
+unsullied		9		
+untainted		9		
+unvarnished		9		
+virtue	0	9		
+virtuous	0	9		
+wholesome		9		
+wisdom		9		
+wise	0	9		
+abject		10		
+adulterated		10		
+adulterous		10		
+amoral	0	10		
+arrogant		10		
+authoritarian		10		
+autocratic		10		
+bamboozle		10		
+bawdy		10		
+beguiled		10		
+besmirch		10		
+besmirched		10		
+brazen		10		
+brazenly		10		
+bribe	0	10		
+bribed	0	10		
+bribery	0	10		
+callous		10		
+careless		10		
+cheat	0	10		
+cheated	0	10		
+cheater	0	10		
+conceited		10		
+confused		10		
+conman		10		
+contaminated		10		
+corruption	0	10		
+coward		10		
+cowardice		10		
+cowardly		10		
+crooked	0	10		
+cynical		10		
+dangerous		10		
+dark		10		
+debased		10	12	
+debauched		10		
+deceitful		10		
+deceive		10		
+defiled		10	12	
+defraud		10		
+deluded		10		
+delusion		10		
+demeaning		10		
+depraved		10		
+devious		10		
+dictatorial		10		
+disgrace	0	10		
+disgraceful	0	10		
+dishonor	0	10		
+dishonorable	0	10		
+disingenuous		10		
+dodgy		10		
+double-dealing		10		
+duplicitous		10		
+egotistical		10		
+elitist		10		
+embezzle		10		
+embezzled		10		
+embezzles		10		
+exploitative		10		
+faithless		10		
+fake		10		
+false		10		
+falsehood	0	10		
+foul		10		
+foul-play		10		
+fraud		10		
+graft	0	10		
+grandstanding		10		
+greed		10		
+greedy		10		
+hypocrite		10		
+hypocritical		10		
+illegal		10		
+illegitimate	0	10		
+ill-gotten		10		
+immoral		10	12	
+impure		10		
+inaccurate		10		
+incompetent		10		
+indefensible		10		
+inept		10		
+inexcusable		10		
+iniquitous		10		
+insincere		10		
+irresponsible		10		
+law-breaking		10		
+liar	0	10		
+lie	0	10		
+lied	0	10		
+loathsome		10		
+Machiavellian		10		
+manipulative		10		
+misguided		10		
+misleading		10		
+misled		10		
+misrepresent		10		
+misrepresenting		10		
+nepotism		10		
+off-color		10		
+pathetic		10		
+perfidy		10		
+perjury	0	10		
+perverse		10	12	
+perverted		10	12	
+prevaricate		10		
+prevarication		10		
+profane		10		
+reprehensible		10		
+reprobate		10		
+repugnant		10		
+rude		10		
+scabrous		10		
+scandalous	0	10		
+scoundrel		10		
+self-centered		10		
+self-interest		10		
+selfish		10		
+self-serving		10		
+shady		10		
+sham		10		
+shameful		10		
+shameless		10		
+shortsighted		10		
+sinful		10		
+slander		10		
+slanderous		10		
+sleazy		10		
+slimy		10		
+smear		10		
+sophistry		10		
+sordid		10		
+spurious		10		
+squalid		10		
+stupid		10		
+subterfuge		10		
+subvert		10		
+sullied		10		
+sully		10		
+taint		10		
+tainted		10		
+tarnish		10		
+thieving		10		
+two-faced		10		
+unconscionable		10		
+undemocratic	0	10		
+underhanded		10		
+unethical	0	10		
+unfounded		10		
+unlawful		10		
+unprofessional	0	10		
+unsavory		10		
+untrue	0	10		
+untrustworthy	0	10		
+unwise		10		
+unworthy		10		
+vote-buying		10		
+abstinence		11		
+chaste	0	11		
+chastity	0	11		
+modesty	0	11		
+procreation		11		
+sex	0	11		
+sexual	0	11		
+sexuality		11		
+adulterer		12		
+adultery		12		
+carnal		12		
+disgraced		12		
+divorced		12		
+filth		12		
+homosexual		12		
+horny		12		
+licentious		12		
+lust	0	12		
+lusty	0	12		
+obscene	0	12		
+obscenity		12		
+pervert	0	12		
+petting		12		
+pornographic	0	12		
+pornography	0	12		
+promiscuity		12		
+promiscuous		12		
+prostitute		12		
+prostitution		12		
+seduction		12		
+seductive		12		
+sensual		12		
+unchaste		12		

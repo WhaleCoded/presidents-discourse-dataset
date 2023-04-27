@@ -1,0 +1,17 @@
+use k-means clustering with k++ algorithm. Try cluster sizes from 2-12 take the highest sihlouette score.
+
+find which cluster each prospective term is closest to and calculate an average similarity score to that cluster.
+
+We need terms from each cluster. How to calculate how many terms from each cluster are chosen. Based off of size of cluster? Proportional to the size of the cluster
+Weight previous words more heavily.
+	80 | 20 . sim score and present in previous dict bonus  
+
+
+Run ensamble with new word2vec model. Run 30 times.
+If I combine using occurences I might destroy the benefits of clustering. 
+Clusters will be different each time. Most common occurences will probably be from the largest cluster.
+sim scores are related to individual clusters -> take average of all occurences plus reocurrence bonus
+	-> what should the reocurrence bonus be?
+		50 | 50 . sim score and reocurrence bonus
+	
+Take the highest scores 

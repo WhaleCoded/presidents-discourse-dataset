@@ -2,35 +2,63 @@ import os
 import sys
 import csv
 import random
+import json
 
 from tqdm import tqdm
-import nltk
-from uuid import uuid4
+import numpy as np
+
+from token_map import TokenMap
 
 
 csv.field_size_limit(sys.maxsize)
 DEFAULT_SPEECH_PATH = os.path.join(
     "data", "cr_speech_sentences_with_speaker_and_date.csv"
 )
+DEFAULT_FILE_MAP_PATH = os.path.join(
+    "data", "cr_speech_sentences_with_speaker_and_date.csv"
+)
+NUM_SENTENCES = 171890150
 
 
 class CongressDataset:
     def __init__(
         self,
+        token_map: TokenMap,
         path_to_speeches=DEFAULT_SPEECH_PATH,
         date_range=None,
         max_length=None,
         data=None,
+        num_sentences=NUM_SENTENCES,
     ):
         self.data_path = path_to_speeches
-        self.data_range = date_range
+        self.date_range = date_range
         self.max_length = max_length
+        self.token_map = token_map
+        self.num_sentences = num_sentences
+
+        self._find_time_period_file()
 
         # Load data
         if data is None:
             self._load_data()
         else:
             self.data = data
+
+    def _find_time_period_file(self):
+        if self.date_range is not None:
+            data_dir = os.path.dirname(self.data_path)
+            time_period_path = os.path.join(
+                data_dir,
+                "time_period_data",
+                f"{self.date_range[0]}_{self.date_range[1]}_cr_speech_sentences_with_speaker_and_date.csv",
+            )
+
+            if os.path.exists(time_period_path):
+                self.data_path = time_period_path
+                self.using_period_file = True
+                return
+
+        self.using_period_file = False
 
     def _load_data(self):
         data = []
@@ -39,14 +67,26 @@ class CongressDataset:
             reader = csv.reader(f)
 
             _ = next(reader)
-            for row in tqdm(reader, desc="Loading data"):
+            if self.using_period_file:
+                pbar = tqdm(reader, desc="Loading time_period data")
+            else:
+                pbar = tqdm(reader, desc="Loading data", total=self.num_sentences)
+
+            for row in pbar:
                 date = int(row[3])
-                if (self.data_range is None) or (
-                    date >= self.data_range[0] and date <= self.data_range[1]
+                if (self.date_range is None) or (
+                    date >= self.date_range[0] and date <= self.date_range[1]
                 ):
 
                     if self.max_length is not None and len(data) >= self.max_length:
                         break
+
+                    # Convert sentence to numpy array to save memory
+                    # sentence_np_array = np.zeros(len(row[4:]), dtype=np.uint32)
+                    sentence_np_array = [0 for _ in row[4:]]
+                    for i, token in enumerate(row[4:]):
+                        token_id = self.token_map.get_token_id_from_token(token)
+                        sentence_np_array[i] = token_id
 
                     data.append(
                         {
@@ -54,7 +94,7 @@ class CongressDataset:
                             "speech_id": row[1],
                             "speaker": row[2],
                             "date": date,
-                            "sentence": row[4:],
+                            "sentence": sentence_np_array,
                         }
                     )
 
@@ -79,7 +119,7 @@ class CongressDataset:
             filtered_data = [data for data in self.data if condition(data)]
             return CongressDataset(
                 path_to_speeches=self.data_path,
-                date_range=self.data_range,
+                date_range=self.date_range,
                 max_length=self.max_length,
                 data=filtered_data,
             )
@@ -97,7 +137,7 @@ class CongressDataset:
 if __name__ == "__main__":
     import collections
 
-    dataset = CongressDataset(date_range=(2005, 2022))
+    dataset = CongressDataset(date_range=(2000, 2022))
     print(len(dataset))
 
     # Test iterator works
