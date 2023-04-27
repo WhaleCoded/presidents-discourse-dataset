@@ -1,6 +1,8 @@
 # Moral Foundation's Perspective on American Presidents
 This repository contains code for collecting presidential speech data, using word embeddings to create dictionaries sensitive to semantic shift, and evaluating presidential moral tendencies using frequency distributions.
 
+There are README files in each sub folder that contain more information about the code in that folder.
+
 ## Getting Started
 * Collect the data: You can use the presidential_data_scrape folder to scrape and clean presidential speech data.
 * Generate Moral Foundation Dictionaries: You can use the moral_foundation_dictionary folder to generate moral foundation dictionaries. These dictionaries improve upon traditional methods historians use by accounting for semantic shift in words over time.
