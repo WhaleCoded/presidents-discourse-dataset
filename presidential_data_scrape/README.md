@@ -4,8 +4,8 @@ This folder contains the code used to scrape, clean, and store presidential spee
 There are two methods to scraping the data one written in python that is single threaded and then a second multi-threaded version written in Rust. The Rust version was not used during this project out of consideration for the UC Santa Barbara's servers and the wonderful service they provide; I would sugggest not using it as well. The python version has some built in rate limiting that can be easily changed by adjusting the global variables found in `download.py`.
 
 ## Getting Started
-* Run the download.py script and it will start the scraping process.
-* Run the parse.py script and it will clean all of the scraped data.
+* Run the `download.py` script and it will start the scraping process.
+* Run the `parse.py` script and it will clean all of the scraped data.
 * You will find the cleaned data in the `data` folder located in the main directory.
 
 ## Index
