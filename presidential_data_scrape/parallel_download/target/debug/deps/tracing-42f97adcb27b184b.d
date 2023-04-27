@@ -1,0 +1,13 @@
+/home/dallin/byu/fall_2022/data_capstone/presidents_scrape/parallel_download/target/debug/deps/tracing-42f97adcb27b184b.rmeta: /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/lib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/macros.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/dispatcher.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/field.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/instrument.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/level_filters.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/span.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/stdlib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/subscriber.rs
+
+/home/dallin/byu/fall_2022/data_capstone/presidents_scrape/parallel_download/target/debug/deps/tracing-42f97adcb27b184b.d: /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/lib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/macros.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/dispatcher.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/field.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/instrument.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/level_filters.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/span.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/stdlib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/subscriber.rs
+
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/lib.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/macros.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/dispatcher.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/field.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/instrument.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/level_filters.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/span.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/stdlib.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.37/src/subscriber.rs:

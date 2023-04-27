@@ -1,0 +1,11 @@
+/home/dallin/byu/fall_2022/data_capstone/presidents_scrape/parallel_download/target/debug/deps/getrandom-9d075985ac6712a3.rmeta: /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/lib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error_impls.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util_libc.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/use_file.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/linux_android.rs
+
+/home/dallin/byu/fall_2022/data_capstone/presidents_scrape/parallel_download/target/debug/deps/getrandom-9d075985ac6712a3.d: /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/lib.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error_impls.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util_libc.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/use_file.rs /home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/linux_android.rs
+
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/lib.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/error_impls.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/util_libc.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/use_file.rs:
+/home/dallin/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.2.7/src/linux_android.rs:
